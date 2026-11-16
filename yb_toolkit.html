@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yb Molecular Complex Toolkit</title>
+<style>
+:root{--bg:#f4f6f9;--ink:#1b2430;--navy:#14213d;--blue:#2f6fed;--line:#dfe4ea}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-size:14px}
+header{background:var(--navy);color:#fff;padding:14px 24px 0;display:flex;flex-direction:column;gap:10px}
+header h1{margin:0;font-size:20px}
+header .sub{color:#b9c4d6;font-size:13px;margin-left:12px;font-weight:400}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{border:0;background:transparent;color:#b9c4d6;padding:9px 16px;font:inherit;font-weight:600;cursor:pointer;border-radius:8px 8px 0 0}
+nav button.on{background:var(--bg);color:var(--ink)}
+nav button:focus-visible{outline:2px solid #fff;outline-offset:-2px}
+iframe{display:block;width:100%;border:0;min-height:600px;background:var(--bg)}
+iframe[hidden]{display:none}
+</style>
+</head>
+<body>
+<header><h1>Yb Molecular Complex Toolkit<span class="sub">Crystal-field splitting and oscillator strength · All calculations run in this browser only</span></h1>
+<nav><button id="b1" class="on" type="button">Crystal-field splitting (SOCF)</button><button id="b2" type="button">Oscillator strength</button></nav></header>
+<iframe id="f1" title="Crystal-field splitting calculator"></iframe>
+<iframe id="f2" title="Oscillator strength calculator" hidden></iframe>
+<script type="text/plain" id="src1"><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yb(III) Crystal-Field Splitting Calculator</title>
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#1b2430;--mute:#5c6675;--line:#dfe4ea;--blue:#2f6fed;--red:#d63c2f;--green:#17734a;--orange:#b8501a;--navy:#14213d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-size:14px;line-height:1.45}
+header{background:var(--navy);color:#fff;padding:14px 24px;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+header h1{margin:0;font-size:20px}
+header .sub{color:#b9c4d6;font-size:13px}
+.layout{display:grid;grid-template-columns:340px 1fr;gap:20px;padding:20px;max-width:1500px;margin:0 auto}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}}
+aside{display:flex;flex-direction:column;gap:14px}
+.panel,.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.panel h2,.card h2{margin:0 0 10px;font-size:14px;font-weight:700}
+.panel label{display:block;font-size:12px;color:var(--mute);margin:8px 0 3px}
+.panel input[type=text],.panel input[type=number],.panel select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px;background:#fff;color:var(--ink)}
+.panel input[type=file]{width:100%;font-size:12px}
+.row{display:flex;gap:8px}.row>*{flex:1;min-width:0}
+.chk{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:13px;color:var(--ink)}
+button{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer}
+button:hover{background:#f0f3f8}
+button.primary{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700;width:100%;padding:10px;font-size:15px}
+button.primary:hover{background:#2560d6}
+button:disabled{opacity:.55;cursor:default}
+.hint{font-size:12px;color:var(--mute);margin-top:6px}
+#status{font-size:13px;padding:8px 10px;border-radius:8px;background:#eef3ff;color:#1c3d8f;min-height:34px}
+#status.err{background:#fdecea;color:#9b2018}
+main{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-content:start}
+@media(max-width:1250px){main{grid-template-columns:1fr}}
+.card.wide{grid-column:1/-1}
+.card svg{width:100%;height:auto;display:block}
+canvas{width:100%;height:320px;display:block;border-radius:8px;background:#f8fafc;cursor:grab;touch-action:none}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+th{color:var(--mute);font-weight:600;font-size:12px}
+.good{color:var(--green);font-weight:700}.bad{color:var(--orange);font-weight:700}
+.warn{background:#fff6e5;border:1px solid #f1d199;color:#6b4300;border-radius:8px;padding:8px 10px;margin-top:8px;font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{background:#eef3ff;color:#1c3d8f;border-radius:999px;padding:2px 9px;font-size:12px}
+.empty{color:var(--mute);font-size:13px;padding:28px 8px;text-align:center}
+.toolbar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.legend{font-size:12px;color:var(--mute);margin-top:6px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:middle}
+</style>
+</head>
+<body>
+
+<div class="layout">
+<aside>
+  <div class="panel">
+    <h2>1. Files</h2>
+    <label>CIF file</label><input type="file" id="cif" accept=".cif,.txt">
+    <label>Absorption spectrum CSV (two columns: x, y)</label>
+    <div class="row"><input type="file" id="absf" accept=".csv,.txt,.dat"><select id="absUnit" style="max-width:80px"><option value="nm">nm</option><option value="ev">eV</option><option value="cm-1">cm⁻¹</option></select></div>
+    <label>Emission spectrum CSV (optional)</label>
+    <div class="row"><input type="file" id="emif" accept=".csv,.txt,.dat"><select id="emiUnit" style="max-width:80px"><option value="nm">nm</option><option value="ev">eV</option><option value="cm-1">cm⁻¹</option></select></div>
+    <div class="toolbar"><button id="demo" type="button">Load example (thiolfan)</button></div>
+    <div class="hint">The example uses the coordinates of SI Table S10 and the energies of Table S11.</div>
+  </div>
+  <div class="panel">
+    <h2>2. Structure</h2>
+    <div class="row"><div><label>Coordination cutoff (Å)</label><input type="number" id="cutoff" value="3.0" step="0.1" min="1.5" max="5"></div>
+    <div><label>Yb atom</label><select id="ybLabel"></select></div></div>
+    <div class="hint">Cl, O, N, S and other donors within the cutoff are found, including atoms generated by symmetry operations.</div>
+  </div>
+  <div class="panel">
+    <h2>3. Target energies</h2>
+    <div class="row"><div><label>Peak search lower limit (eV)</label><input type="number" id="wlo" value="1.20" step="0.01"></div><div><label>Upper limit (eV)</label><input type="number" id="whi" value="1.50" step="0.01"></div></div>
+    <div class="row"><div><label>Minimum prominence</label><input type="number" id="prom" value="0.05" step="0.01" min="0.005"></div><div><label>Peaks to skip</label><input type="number" id="skip" value="0" min="0" step="1"></div></div>
+    <button id="redetect" type="button" style="margin-top:8px;width:100%">Find peaks again</button>
+    <div id="peakChips" class="chips"></div>
+    <label>E(9,10), E(11,12), E(13,14) − E(1,2) (eV)</label>
+    <div class="row"><input type="number" id="t1" step="0.0001" placeholder="E(9,10)"><input type="number" id="t2" step="0.0001" placeholder="E(11,12) optional"><input type="number" id="t3" step="0.0001" placeholder="E(13,14)"></div>
+    <div class="hint">Clear a box if that line is not observed or is a hot band (for example E(11,12)). At least two energies are needed.</div>
+    <label>Experimental ground splitting E(3,4)−E(1,2) (meV)</label>
+    <input type="number" id="gs" step="0.1" placeholder="Filled from emission data, or enter manually">
+    <label class="chk"><input type="checkbox" id="useGs" checked> Include ground splitting as a fit target</label>
+    <label class="chk"><input type="checkbox" id="fitQ"> Also fit the charge split (halide / oxygen)</label>
+    <label>ξ spin–orbit constant (cm⁻¹)</label><input type="number" id="xi" value="2870" step="10">
+  </div>
+  <button id="run" class="primary">Run calculation</button>
+  <div id="status">Upload a CIF and an absorption CSV, or load the example.</div>
+</aside>
+<main>
+  <div class="card"><h2>Yb coordination structure (drag to rotate, wheel to zoom)</h2><canvas id="c3d" width="640" height="320"></canvas>
+    <div class="legend"><span class="dot" style="background:#14213d"></span>Yb <span class="dot" style="background:#d9541e"></span>O <span class="dot" style="background:#2e9e5b"></span>Cl <span class="dot" style="background:#2f6fed"></span>N <span class="dot" style="background:#d9a21e"></span>S</div>
+    <div class="toolbar"><button id="resetView" type="button">Reset view</button><label class="chk" style="margin:0"><input type="checkbox" id="showQ"> Show charges</label></div>
+    <div id="donorTable"></div></div>
+  <div class="card"><h2>Absorption spectrum and calculated transitions</h2><div id="absPlot"><div class="empty">Shown after you upload an absorption CSV.</div></div></div>
+  <div class="card"><h2>Energy levels</h2><div id="levelPlot"><div class="empty">Shown after you run the calculation.</div></div></div>
+  <div class="card"><h2>Emission spectrum (ground-splitting check)</h2><div id="emiPlot"><div class="empty">Shown after you upload an emission CSV.</div></div><div id="emiInfo"></div></div>
+  <div class="card wide"><h2>Results</h2><div id="results"><div class="empty">Shown after you run the calculation.</div></div></div>
+</main>
+</div>
+<script>
+/* ===== SOCF core (port of yb_socf_cif.py) ===== */
+const K_COULOMB = 116140.6;          // e^2/(4 pi eps0) in cm^-1 * Angstrom
+const CM_PER_MEV = 8.065544;
+const H_C_EV_NM = 1239.84198;
+const LQ = 3;
+const MS = [3, 2, 1, 0, -1, -2, -3];
+const ELECTRONEG = { F: 3.98, O: 3.5, N: 3.04, Cl: 3.16, Br: 2.96, I: 2.66, S: 2.58, P: 2.19, C: 2.55 };
+const HALIDES = ['F', 'Cl', 'Br', 'I'];
+const DONORS = ['O', 'N', 'Cl', 'Br', 'I', 'F', 'S', 'P'];
+
+const FACT = [1];
+for (let i = 1; i <= 24; i++) FACT[i] = FACT[i - 1] * i;
+
+/* ---------- spherical harmonics ---------- */
+function plm(l, m, x) {               // associated Legendre, Condon-Shortley phase (same as scipy lpmv)
+  let pmm = 1;
+  if (m > 0) {
+    const somx2 = Math.sqrt((1 - x) * (1 + x));
+    let fact = 1;
+    for (let i = 1; i <= m; i++) { pmm *= -fact * somx2; fact += 2; }
+  }
+  if (l === m) return pmm;
+  let pmmp1 = x * (2 * m + 1) * pmm;
+  if (l === m + 1) return pmmp1;
+  let pll = 0;
+  for (let ll = m + 2; ll <= l; ll++) {
+    pll = (x * (2 * ll - 1) * pmmp1 - (ll + m - 1) * pmm) / (ll - m);
+    pmm = pmmp1; pmmp1 = pll;
+  }
+  return pll;
+}
+function Ykq(k, q, th, ph) {
+  if (q < 0) {
+    const [r, i] = Ykq(k, -q, th, ph);
+    const s = (q % 2 === 0) ? 1 : -1;
+    return [s * r, -s * i];
+  }
+  const n = Math.sqrt((2 * k + 1) / (4 * Math.PI) * FACT[k - q] / FACT[k + q]) * plm(k, q, Math.cos(th));
+  return [n * Math.cos(q * ph), n * Math.sin(q * ph)];
+}
+function Ckq(k, q, th, ph) {
+  const [r, i] = Ykq(k, q, th, ph);
+  const f = Math.sqrt(4 * Math.PI / (2 * k + 1));
+  return [f * r, f * i];
+}
+
+/* ---------- Racah tensor matrices <3 m|C_q^k|3 m'> by exact quadrature ---------- */
+function gaussLegendre(n) {
+  const x = [], w = [];
+  for (let i = 0; i < n; i++) {
+    let z = Math.cos(Math.PI * (i + 0.75) / (n + 0.5)), pp = 1;
+    for (let it = 0; it < 100; it++) {
+      let p1 = 1, p2 = 0;
+      for (let j = 0; j < n; j++) { const p3 = p2; p2 = p1; p1 = ((2 * j + 1) * z * p2 - j * p3) / (j + 1); }
+      pp = n * (z * p1 - p2) / (z * z - 1);
+      const z1 = z; z = z1 - p1 / pp;
+      if (Math.abs(z - z1) < 1e-15) break;
+    }
+    // recompute pp at final z
+    let p1 = 1, p2 = 0;
+    for (let j = 0; j < n; j++) { const p3 = p2; p2 = p1; p1 = ((2 * j + 1) * z * p2 - j * p3) / (j + 1); }
+    pp = n * (z * p1 - p2) / (z * z - 1);
+    x.push(z); w.push(2 / ((1 - z * z) * pp * pp));
+  }
+  return { x, w };
+}
+let GRID = null;
+function getGrid() {
+  if (GRID) return GRID;
+  const NA = 24, NB = 32, gl = gaussLegendre(NA);
+  const th = [], ph = [], w = [];
+  for (let a = 0; a < NA; a++) for (let b = 0; b < NB; b++) {
+    th.push(Math.acos(gl.x[a])); ph.push(2 * Math.PI * b / NB); w.push(gl.w[a] * 2 * Math.PI / NB);
+  }
+  const Yre = [], Yim = [];
+  for (const m of MS) {
+    const re = new Float64Array(th.length), im = new Float64Array(th.length);
+    for (let p = 0; p < th.length; p++) { const [r, i] = Ykq(LQ, m, th[p], ph[p]); re[p] = r; im[p] = i; }
+    Yre.push(re); Yim.push(im);
+  }
+  GRID = { th, ph, w, Yre, Yim, n: th.length };
+  return GRID;
+}
+const RACAH = {};
+function racah(k, q) {
+  const key = k + ',' + q;
+  if (RACAH[key]) return RACAH[key];
+  const g = getGrid();
+  const cre = new Float64Array(g.n), cim = new Float64Array(g.n);
+  for (let p = 0; p < g.n; p++) { const [r, i] = Ckq(k, q, g.th[p], g.ph[p]); cre[p] = r; cim[p] = i; }
+  const re = new Float64Array(49), im = new Float64Array(49);
+  for (let i = 0; i < 7; i++) for (let j = 0; j < 7; j++) {
+    let sr = 0, si = 0;
+    for (let p = 0; p < g.n; p++) {
+      // conj(Y_i) * C * Y_j
+      const ar = g.Yre[i][p], ai = -g.Yim[i][p];
+      const br = cre[p] * g.Yre[j][p] - cim[p] * g.Yim[j][p];
+      const bi = cre[p] * g.Yim[j][p] + cim[p] * g.Yre[j][p];
+      sr += g.w[p] * (ar * br - ai * bi);
+      si += g.w[p] * (ar * bi + ai * br);
+    }
+    re[i * 7 + j] = sr; im[i * 7 + j] = si;
+  }
+  return (RACAH[key] = { re, im });
+}
+
+/* ---------- spin-orbit matrix l.s (14x14 real) ---------- */
+const LS = (() => {
+  const M = new Float64Array(196);
+  for (let s = 0; s < 2; s++) for (let mi = 0; mi < 7; mi++) {
+    const idx = s * 7 + mi;
+    M[idx * 14 + idx] += (s === 0 ? 0.5 : -0.5) * MS[mi];
+  }
+  for (let mi = 0; mi < 7; mi++) {
+    const m = MS[mi];
+    if (m < LQ) {
+      const c = Math.sqrt(LQ * (LQ + 1) - m * (m + 1));
+      const mj = MS.indexOf(m + 1);
+      const a = 1 * 7 + mj, b = 0 * 7 + mi;           // <down,m+1| s- l+ |up,m>
+      M[a * 14 + b] += 0.5 * c; M[b * 14 + a] += 0.5 * c;
+    }
+  }
+  return M;
+})();
+
+/* ---------- crystal field ---------- */
+function geometry(xyz) {
+  const th = [], ph = [], R = [];
+  for (const v of xyz) {
+    const r = Math.hypot(v[0], v[1], v[2]);
+    R.push(r); th.push(Math.acos(v[2] / r)); ph.push(Math.atan2(v[1], v[0]));
+  }
+  return { th, ph, R, n: xyz.length };
+}
+function buildHk(geo, Q) {            // per-k 7x7 complex matrices with <r^k> = 1 (eq. S3, S2)
+  const out = [null];
+  for (let k = 1; k <= 6; k++) {
+    const re = new Float64Array(49), im = new Float64Array(49);
+    for (let q = -k; q <= k; q++) {
+      let Ar = 0, Ai = 0;
+      for (let i = 0; i < geo.n; i++) {
+        const [cr, ci] = Ckq(k, -q, geo.th[i], geo.ph[i]);
+        const s = ((q % 2 === 0) ? 1 : -1) * Q[i] / Math.pow(geo.R[i], k + 1);
+        Ar += s * cr; Ai += s * ci;
+      }
+      Ar *= K_COULOMB; Ai *= K_COULOMB;
+      const M = racah(k, q);
+      for (let t = 0; t < 49; t++) {
+        re[t] += Ar * M.re[t] - Ai * M.im[t];
+        im[t] += Ar * M.im[t] + Ai * M.re[t];
+      }
+    }
+    out.push({ re, im });
+  }
+  return out;
+}
+
+/* ---------- eigenvalues of a real symmetric matrix (cyclic Jacobi) ---------- */
+function jacobiEigenvalues(a, n) {
+  for (let sweep = 0; sweep < 60; sweep++) {
+    let off = 0;
+    for (let p = 0; p < n - 1; p++) for (let q = p + 1; q < n; q++) off += a[p * n + q] * a[p * n + q];
+    if (off < 1e-14) break;
+    for (let p = 0; p < n - 1; p++) for (let q = p + 1; q < n; q++) {
+      const apq = a[p * n + q];
+      if (Math.abs(apq) < 1e-300) continue;
+      const app = a[p * n + p], aqq = a[q * n + q];
+      const theta = (aqq - app) / (2 * apq);
+      const t = (theta >= 0 ? 1 : -1) / (Math.abs(theta) + Math.sqrt(theta * theta + 1));
+      const c = 1 / Math.sqrt(t * t + 1), s = t * c;
+      a[p * n + p] = app - t * apq; a[q * n + q] = aqq + t * apq;
+      a[p * n + q] = 0; a[q * n + p] = 0;
+      for (let r = 0; r < n; r++) {
+        if (r === p || r === q) continue;
+        const arp = a[r * n + p], arq = a[r * n + q];
+        const np_ = c * arp - s * arq, nq_ = s * arp + c * arq;
+        a[r * n + p] = np_; a[p * n + r] = np_;
+        a[r * n + q] = nq_; a[q * n + r] = nq_;
+      }
+    }
+  }
+  const e = new Float64Array(n);
+  for (let i = 0; i < n; i++) e[i] = a[i * n + i];
+  return Array.from(e).sort((x, y) => x - y);
+}
+
+function eigLevels(Hk, r, xi) {       // r[k] = <r^k>; H = -xi l.s + H_CF ; returns 28 sorted eigenvalues (each level twice)
+  const N = 28, S = new Float64Array(N * N);
+  const A = new Float64Array(196), B = new Float64Array(196);
+  for (let i = 0; i < 196; i++) A[i] = -xi * LS[i];
+  for (let s = 0; s < 2; s++) for (let i = 0; i < 7; i++) for (let j = 0; j < 7; j++) {
+    let hr = 0, hi = 0;
+    for (let k = 1; k <= 6; k++) { hr += r[k] * Hk[k].re[i * 7 + j]; hi += r[k] * Hk[k].im[i * 7 + j]; }
+    A[(s * 7 + i) * 14 + s * 7 + j] += hr;
+    B[(s * 7 + i) * 14 + s * 7 + j] += hi;
+  }
+  for (let i = 0; i < 14; i++) for (let j = 0; j < 14; j++) {
+    S[i * N + j] = A[i * 14 + j];
+    S[i * N + 14 + j] = -B[i * 14 + j];
+    S[(14 + i) * N + j] = B[i * 14 + j];
+    S[(14 + i) * N + 14 + j] = A[i * 14 + j];
+  }
+  for (let i = 0; i < N; i++) for (let j = i + 1; j < N; j++) {      // Hermitian symmetrisation
+    const v = 0.5 * (S[i * N + j] + S[j * N + i]); S[i * N + j] = v; S[j * N + i] = v;
+  }
+  return jacobiEigenvalues(S, N);
+}
+function doublets(E) { const d = []; for (let i = 0; i < 7; i++) d.push((E[4 * i] + E[4 * i + 1] + E[4 * i + 2] + E[4 * i + 3]) / 4); return d; }
+function summarize(d) {
+  const g = d.slice(0, 4), e = d.slice(4);
+  return {
+    ground_split: (g[1] - g[0]) / CM_PER_MEV, excited_split: (e[1] - e[0]) / CM_PER_MEV,
+    ground_total: (g[3] - g[0]) / CM_PER_MEV, excited_total: (e[2] - e[0]) / CM_PER_MEV,
+    transitions: [0, 1, 2].map(i => (e[i] - g[0]) / CM_PER_MEV / 1000), doublets: d
+  };
+}
+function radialArr(a, rho) { const r = [0]; for (let k = 1; k <= 6; k++) r.push(a * Math.pow(rho, k)); return r; }
+
+/* ---------- charges ---------- */
+function initialCharges(els) {
+  const q = els.map(e => -(ELECTRONEG[e] || 2.5) / 4);
+  const s = q.reduce((x, y) => x + y, 0);
+  return q.map(v => v * -3 / s);
+}
+
+/* ---------- Nelder-Mead ---------- */
+function nelderMead(f, x0, step, maxIter) {
+  const n = x0.length;
+  let sx = [x0.slice()];
+  for (let i = 0; i < n; i++) { const x = x0.slice(); x[i] += step[i]; sx.push(x); }
+  let fv = sx.map(f);
+  for (let it = 0; it < maxIter; it++) {
+    const ord = fv.map((v, i) => i).sort((a, b) => fv[a] - fv[b]);
+    sx = ord.map(i => sx[i]); fv = ord.map(i => fv[i]);
+    let size = 0;
+    for (let i = 1; i <= n; i++) for (let j = 0; j < n; j++) size = Math.max(size, Math.abs(sx[i][j] - sx[0][j]));
+    if (Math.abs(fv[n] - fv[0]) < 1e-10 * (1 + Math.abs(fv[0])) && size < 1e-7) break;
+    const c = new Array(n).fill(0);
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) c[j] += sx[i][j] / n;
+    const pt = (t) => c.map((cj, j) => cj + t * (sx[n][j] - cj));
+    const xr = pt(-1), fr = f(xr);
+    if (fr < fv[0]) {
+      const xe = pt(-2), fe = f(xe);
+      if (fe < fr) { sx[n] = xe; fv[n] = fe; } else { sx[n] = xr; fv[n] = fr; }
+    } else if (fr < fv[n - 1]) { sx[n] = xr; fv[n] = fr; }
+    else {
+      const xc = fr < fv[n] ? pt(-0.5) : pt(0.5), fc = f(xc);
+      if (fc < Math.min(fr, fv[n])) { sx[n] = xc; fv[n] = fc; }
+      else for (let i = 1; i <= n; i++) { sx[i] = sx[i].map((v, j) => sx[0][j] + 0.5 * (v - sx[0][j])); fv[i] = f(sx[i]); }
+    }
+  }
+  let b = 0; for (let i = 1; i <= n; i++) if (fv[i] < fv[b]) b = i;
+  return { x: sx[b], fx: fv[b] };
+}
+
+/* ---------- fit (generator so the UI can show progress) ---------- */
+function* fitGen(xyz, els, targets, gs, fitCharges, xi) {
+  const geo = geometry(xyz);
+  const q0 = initialCharges(els);
+  const hal = els.map(e => HALIDES.includes(e));
+  const canQ = !!fitCharges && hal.some(v => v) && hal.some(v => !v);
+  const chargesF = (f) => {
+    const q = q0.slice();
+    if (!canQ) return q;
+    let sh = 0, s0 = 0;
+    for (let i = 0; i < q.length; i++) if (hal[i]) { q[i] = q0[i] * f; sh += q[i]; } else s0 += q0[i];
+    const rest = -3 - sh;
+    for (let i = 0; i < q.length; i++) if (!hal[i]) q[i] = q0[i] * rest / s0;
+    return q;
+  };
+  const cache = { f: null, Hk: null };
+  const hk = (f) => { if (cache.f !== f) { cache.Hk = buildHk(geo, chargesF(f)); cache.f = f; } return cache.Hk; };
+  const evalP = (p) => {
+    const f = canQ ? p[2] : 1;
+    const E = eigLevels(hk(f), radialArr(Math.exp(p[0]), p[1]), xi);
+    const s = summarize(doublets(E));
+    const out = [], r3 = [null, null, null];
+    for (let i = 0; i < 3; i++) if (targets[i] != null && Number.isFinite(targets[i])) { const v = 1000 * (s.transitions[i] - targets[i]); out.push(v); r3[i] = v; }
+    if (gs != null) out.push(s.ground_split - gs);
+    return { out, s, r3 };
+  };
+  const lo = [Math.log(1e-4), 0.05], hi = [Math.log(50), 1.5];
+  if (canQ) { lo.push(0.3); hi.push(2.0); }
+  const clamp = (p) => p.map((v, i) => Math.min(hi[i], Math.max(lo[i], v)));
+  const cost = (p) => {
+    const c = clamp(p); let pen = 0;
+    for (let i = 0; i < p.length; i++) pen += (p[i] - c[i]) ** 2;
+    return evalP(c).out.reduce((s, v) => s + v * v, 0) + 1e4 * pen;
+  };
+  let best = null, n = 0;
+  for (const a0 of [0.3, 1, 3]) for (const r0 of [0.2, 0.4, 0.6]) {
+    n++;
+    const x0 = [Math.log(a0), r0]; if (canQ) x0.push(1.0);
+    const res = nelderMead(cost, x0, canQ ? [0.5, 0.1, 0.15] : [0.5, 0.1], 400);
+    if (!best || res.fx < best.fx) best = res;
+    yield n + '/9';
+  }
+  const p = clamp(best.x);
+  const { out, s, r3 } = evalP(p);
+  const f = canQ ? p[2] : 1;
+  return {
+    a: Math.exp(p[0]), rho: p[1], f: canQ ? f : null, charges: chargesF(f), residuals: out, resid3: r3, summary: s, canQ,
+    atBounds: p[0] <= lo[0] + 1e-3 || p[1] <= lo[1] + 1e-3 || p[1] >= hi[1] - 1e-3 || (canQ && (p[2] <= 0.3 + 1e-3 || p[2] >= 2 - 1e-3)),
+    nTargets: targets.filter(v => v != null && Number.isFinite(v)).length + (gs != null ? 1 : 0), nParams: p.length
+  };
+}
+function fitSync(...args) { const g = fitGen(...args); let s; while (!(s = g.next()).done); return s.value; }
+
+/* ---------- CIF ---------- */
+function splitRow(line) { return line.match(/'[^']*'|"[^"]*"|\S+/g) || []; }
+function numStr(s) { return parseFloat(String(s).replace(/\(.*?\)/g, '')); }
+function readCIF(text) {
+  const lines = text.split(/\r?\n/).filter(l => !l.trimStart().startsWith('#'));
+  const cell = {}; const loops = [];
+  let i = 0;
+  while (i < lines.length) {
+    const s = lines[i].trim();
+    const m = s.match(/^_cell_(length_[abc]|angle_(?:alpha|beta|gamma))\s+(\S+)/);
+    if (m) cell[m[1]] = numStr(m[2]);
+    if (s.toLowerCase().startsWith('data_') && loops.length) break;
+    if (s === 'loop_') {
+      i++;
+      const heads = [];
+      while (i < lines.length && lines[i].trim().startsWith('_')) { heads.push(lines[i].trim().toLowerCase()); i++; }
+      const rows = []; let buf = [];
+      while (i < lines.length) {
+        const t = lines[i].trim();
+        if (t === '') { i++; continue; }
+        if (t.startsWith('_') || t === 'loop_' || t.toLowerCase().startsWith('data_')) break;
+        if (t.startsWith(';')) {
+          i++; while (i < lines.length && !lines[i].trim().startsWith(';')) i++;
+          i++; buf.push('?');
+        } else { buf = buf.concat(splitRow(t)); i++; }
+        while (heads.length && buf.length >= heads.length) { rows.push(buf.slice(0, heads.length)); buf = buf.slice(heads.length); }
+      }
+      loops.push({ heads, rows });
+      continue;
+    }
+    i++;
+  }
+  const need = ['length_a', 'length_b', 'length_c', 'angle_alpha', 'angle_beta', 'angle_gamma'];
+  if (need.some(k => !(k in cell))) throw new Error('Cell parameters were not found.');
+  let symops = [], atoms = [];
+  for (const { heads, rows } of loops) {
+    for (const key of ['_space_group_symop_operation_xyz', '_symmetry_equiv_pos_as_xyz'])
+      if (heads.includes(key)) symops = rows.map(r => r[heads.indexOf(key)].replace(/^['"]|['"]$/g, ''));
+    if (heads.includes('_atom_site_fract_x')) {
+      const h = {}; heads.forEach((n, k) => h[n] = k);
+      for (const r of rows) {
+        const label = r[h['_atom_site_label']];
+        let sym = '_atom_site_type_symbol' in h ? r[h['_atom_site_type_symbol']] : label;
+        sym = (sym.match(/[A-Za-z]+/) || [''])[0]; sym = sym.charAt(0).toUpperCase() + sym.slice(1).toLowerCase();
+        let occ = 1;
+        if ('_atom_site_occupancy' in h) { const o = numStr(r[h['_atom_site_occupancy']]); if (Number.isFinite(o)) occ = o; }
+        const f = [numStr(r[h['_atom_site_fract_x']]), numStr(r[h['_atom_site_fract_y']]), numStr(r[h['_atom_site_fract_z']])];
+        if (f.some(v => !Number.isFinite(v))) continue;
+        atoms.push({ label, el: sym, frac: f, occ });
+      }
+    }
+  }
+  if (!symops.length) symops = ['x,y,z'];
+  if (!atoms.length) throw new Error('Atom coordinates were not found.');
+  return { cell, symops: symops.map(parseSymop), atoms };
+}
+function parseSymop(op) {
+  return op.toLowerCase().replace(/\s+/g, '').replace(/['"]/g, '').split(',').map(c => {
+    const co = [0, 0, 0]; let t = 0;
+    const re = /([+-]?)(\d+\/\d+|\d+\.\d*|\.\d+|\d+)?(\*?)([xyz])?/g; let m;
+    while ((m = re.exec(c)) !== null) {
+      if (m[0] === '') { re.lastIndex++; continue; }
+      const sign = m[1] === '-' ? -1 : 1;
+      let num = 1;
+      if (m[2] !== undefined) { num = m[2].includes('/') ? (+m[2].split('/')[0]) / (+m[2].split('/')[1]) : parseFloat(m[2]); }
+      if (m[4]) co['xyz'.indexOf(m[4])] += sign * num; else if (m[2] !== undefined) t += sign * num;
+    }
+    return { co, t };
+  });
+}
+function applySymop(op, f) { return op.map(({ co, t }) => co[0] * f[0] + co[1] * f[1] + co[2] * f[2] + t); }
+function cellMatrix(c) {
+  const rad = d => d * Math.PI / 180;
+  const a = c.length_a, b = c.length_b, cc = c.length_c, al = rad(c.angle_alpha), be = rad(c.angle_beta), ga = rad(c.angle_gamma);
+  const va = [a, 0, 0], vb = [b * Math.cos(ga), b * Math.sin(ga), 0];
+  const cx = cc * Math.cos(be), cy = cc * (Math.cos(al) - Math.cos(be) * Math.cos(ga)) / Math.sin(ga);
+  const cz = Math.sqrt(Math.max(cc * cc - cx * cx - cy * cy, 0));
+  return [va, vb, [cx, cy, cz]];
+}
+function ybSites(cif) { return cif.atoms.filter(a => a.el === 'Yb'); }
+function ybEnvironment(cif, cutoff, label) {
+  const M = cellMatrix(cif.cell);
+  const sites = ybSites(cif);
+  if (!sites.length) throw new Error('No Yb atom was found in the CIF.');
+  const yb = (label && sites.find(s => s.label === label)) || sites[0];
+  const found = [];
+  const trans = []; for (const x of [-1, 0, 1]) for (const y of [-1, 0, 1]) for (const z of [-1, 0, 1]) trans.push([x, y, z]);
+  for (const a of cif.atoms) {
+    if (!DONORS.includes(a.el)) continue;
+    for (const op of cif.symops) {
+      const fp = applySymop(op, a.frac);
+      const d0 = fp.map((v, k) => { const d = v - yb.frac[k]; return d - Math.round(d); });
+      for (const t of trans) {
+        const d = [d0[0] + t[0], d0[1] + t[1], d0[2] + t[2]];
+        const v = [0, 1, 2].map(j => d[0] * M[0][j] + d[1] * M[1][j] + d[2] * M[2][j]);
+        const r = Math.hypot(v[0], v[1], v[2]);
+        if (r > 0.1 && r < cutoff && !found.some(u => Math.hypot(v[0] - u.xyz[0], v[1] - u.xyz[1], v[2] - u.xyz[2]) < 0.1))
+          found.push({ label: a.label, el: a.el, xyz: v, r, occ: a.occ });
+      }
+    }
+  }
+  found.sort((p, q) => p.r - q.r);
+  return { yb, env: found };
+}
+
+/* ---------- spectra ---------- */
+function parseSpectrum(text, unit) {
+  const xs = [], ys = [];
+  for (const ln of text.split(/\r?\n/)) {
+    const p = ln.trim().split(/[,;\s\t]+/).filter(Boolean);
+    if (p.length >= 2) { const x = parseFloat(p[0]), y = parseFloat(p[1]); if (Number.isFinite(x) && Number.isFinite(y)) { xs.push(x); ys.push(y); } }
+  }
+  if (xs.length < 10) throw new Error('Could not read a two-column (x, y) spectrum.');
+  const E = xs.map(x => unit === 'nm' ? H_C_EV_NM / x : unit === 'cm-1' ? x / 8065.544 : x);
+  const ord = E.map((v, i) => i).sort((a, b) => E[a] - E[b]);
+  return { E: ord.map(i => E[i]), y: ord.map(i => ys[i]) };
+}
+function findPeaks(E, y, lo, hi, promFrac) {
+  const idx = []; for (let i = 0; i < E.length; i++) if (E[i] >= lo && E[i] <= hi) idx.push(i);
+  if (idx.length < 10) return [];
+  const e = idx.map(i => E[i]); let v = idx.map(i => y[i]);
+  const co = [-2, 3, 6, 7, 6, 3, -2], sm = v.slice();
+  for (let i = 3; i < v.length - 3; i++) { let s = 0; for (let k = -3; k <= 3; k++) s += co[k + 3] * v[i + k]; sm[i] = s / 21; }
+  const mn = Math.min(...sm), s2 = sm.map(x => x - mn), mx = Math.max(...s2);
+  const peaks = [];
+  for (let i = 1; i < s2.length - 1; i++) {
+    if (!(s2[i] > s2[i - 1] && s2[i] >= s2[i + 1])) continue;
+    let lmin = s2[i]; for (let j = i - 1; j >= 0 && s2[j] <= s2[i]; j--) lmin = Math.min(lmin, s2[j]);
+    let rmin = s2[i]; for (let j = i + 1; j < s2.length && s2[j] <= s2[i]; j++) rmin = Math.min(rmin, s2[j]);
+    const prom = s2[i] - Math.max(lmin, rmin);
+    if (prom >= promFrac * mx) peaks.push({ E: e[i], h: s2[i], prom });
+  }
+  return peaks;
+}
+
+if (typeof module !== 'undefined') module.exports = { geometry, buildHk, eigLevels, doublets, summarize, radialArr, initialCharges, fitSync, fitGen, readCIF, ybEnvironment, parseSpectrum, findPeaks, CM_PER_MEV };
+
+/* ===== UI ===== */
+const $ = id => document.getElementById(id);
+const S = { cif: null, env: null, yb: null, abs: null, emi: null, res: null, peaksAbs: [], emi_gap: null };
+const fmt = (x, d = 2) => Number.isFinite(x) ? x.toFixed(d) : '—';
+const ELCOL = { O: '#d9541e', Cl: '#2e9e5b', N: '#2f6fed', S: '#d9a21e', Br: '#8a4b2e', I: '#7a3fa0', F: '#3aa6b9', P: '#c24d8a', Yb: '#14213d' };
+function setStatus(msg, err) { const s = $('status'); s.textContent = msg; s.className = err ? 'err' : ''; }
+function readText(f) { return new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = () => no(new Error('Could not read the file.')); r.readAsText(f); }); }
+const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+/* ---------- plotting helpers ---------- */
+function niceStep(range, target) {
+  const raw = range / target, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
+  return (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * p;
+}
+function spectrumSVG(sp, o) {
+  const W = 640, H = 300, ml = 52, mr = 14, mt = 36, mb = 44, pw = W - ml - mr, ph = H - mt - mb;
+  const E = [], Y = [];
+  for (let i = 0; i < sp.E.length; i++) if (sp.E[i] >= o.lo && sp.E[i] <= o.hi) { E.push(sp.E[i]); Y.push(sp.y[i]); }
+  if (E.length < 3) return '<div class="empty">No data in the displayed range.</div>';
+  const mn = Math.min(...Y), mx = Math.max(...Y), rg = (mx - mn) || 1;
+  const X = e => ml + (e - o.lo) / (o.hi - o.lo) * pw, Yf = y => mt + ph - (y - mn) / rg * ph;
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.alt)}">`;
+  const st = niceStep(o.hi - o.lo, 6);
+  for (let t = Math.ceil(o.lo / st) * st; t <= o.hi + 1e-9; t += st) {
+    s += `<line x1="${X(t)}" y1="${mt}" x2="${X(t)}" y2="${mt + ph}" stroke="#eef1f5"/><text x="${X(t)}" y="${mt + ph + 16}" text-anchor="middle" font-size="12" fill="#5c6675">${t.toFixed(st < 0.02 ? 3 : 2)}</text>`;
+  }
+  s += `<rect x="${ml}" y="${mt}" width="${pw}" height="${ph}" fill="none" stroke="#c9d1db"/>`;
+  s += `<text x="${ml + pw / 2}" y="${H - 6}" text-anchor="middle" font-size="12" fill="#5c6675">Energy (eV)</text>`;
+  s += `<text x="14" y="${mt + ph / 2}" text-anchor="middle" font-size="12" fill="#5c6675" transform="rotate(-90 14 ${mt + ph / 2})">${esc(o.ylabel || 'Intensity (a.u.)')}</text>`;
+  let d = ''; for (let i = 0; i < E.length; i++) d += (i ? 'L' : 'M') + X(E[i]).toFixed(1) + ' ' + Yf(Y[i]).toFixed(1);
+  s += `<path d="${d}" fill="none" stroke="#1b2430" stroke-width="1.4"/>`;
+  (o.lines || []).forEach(l => {
+    if (l.x < o.lo || l.x > o.hi) return;
+    s += `<line x1="${X(l.x)}" y1="${mt}" x2="${X(l.x)}" y2="${mt + ph}" stroke="${l.color}" stroke-width="1.6" stroke-dasharray="6 4"/>`;
+    s += `<text x="${X(l.x) + 3}" y="${mt + 12 + (l.dy || 0)}" font-size="11" fill="${l.color}">${esc(l.label)}</text>`;
+  });
+  (o.marks || []).forEach(m => {
+    if (m.x < o.lo || m.x > o.hi) return;
+    const y = Yf(m.y);
+    s += `<path d="M${X(m.x)} ${y - 4}l-5 -9h10z" fill="${m.color}"/><text x="${X(m.x)}" y="${y - 17}" text-anchor="middle" font-size="11" fill="${m.color}">${esc(m.label)}</text>`;
+  });
+  return s + '</svg>';
+}
+
+/* ---------- 3D view ---------- */
+const view = { rx: -0.45, ry: 0.7, zoom: 1 };
+function draw3D() {
+  const c = $('c3d'), dpr = window.devicePixelRatio || 1, w = c.clientWidth, h = c.clientHeight;
+  if (c.width !== Math.round(w * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
+  const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+  if (!S.env) { g.fillStyle = '#5c6675'; g.font = '13px sans-serif'; g.textAlign = 'center'; g.fillText('The Yb coordination structure is shown after you upload a CIF.', w / 2, h / 2); return; }
+  const atoms = [{ x: 0, y: 0, z: 0, el: 'Yb', label: 'Yb', r: 0 }].concat(S.env.map((u, i) => ({ x: u.xyz[0], y: u.xyz[1], z: u.xyz[2], el: u.el, label: u.label, r: u.r, q: S.res ? S.res.charges[i] : null })));
+  const cy = Math.cos(view.ry), sy = Math.sin(view.ry), cx = Math.cos(view.rx), sx = Math.sin(view.rx);
+  const P = atoms.map(a => { const x1 = cy * a.x + sy * a.z, z1 = -sy * a.x + cy * a.z; const y2 = cx * a.y - sx * z1, z2 = sx * a.y + cx * z1; return Object.assign({}, a, { px: x1, py: y2, pz: z2 }); });
+  const maxR = Math.max(3, ...S.env.map(u => u.r));
+  const sc = Math.min(w, h) / 2 / (maxR * 1.45) * view.zoom, ox = w / 2, oy = h / 2;
+  const scr = p => [ox + p.px * sc, oy - p.py * sc];
+  g.lineWidth = 3;
+  P.slice(1).forEach(p => { const [x, y] = scr(p); g.strokeStyle = 'rgba(100,112,130,.55)'; g.beginPath(); g.moveTo(ox, oy); g.lineTo(x, y); g.stroke(); });
+  [...P].sort((a, b) => a.pz - b.pz).forEach(p => {
+    const [x, y] = scr(p), rad = (p.el === 'Yb' ? 0.55 : 0.38) * sc * (1 + p.pz * 0.04);
+    const gr = g.createRadialGradient(x - rad * .3, y - rad * .3, rad * .1, x, y, rad);
+    const col = ELCOL[p.el] || '#8a94a3'; gr.addColorStop(0, '#ffffffaa'); gr.addColorStop(0.25, col); gr.addColorStop(1, col);
+    g.fillStyle = gr; g.beginPath(); g.arc(x, y, rad, 0, 7); g.fill();
+    g.font = '12px sans-serif'; g.textAlign = 'left'; g.fillStyle = '#1b2430';
+    let t = p.el === 'Yb' ? 'Yb' : `${p.label} ${p.r.toFixed(2)} Å`;
+    if (p.q != null && $('showQ').checked) t += `  (${p.q.toFixed(2)} e)`;
+    g.fillText(t, x + rad + 4, y + 4);
+  });
+}
+(function () {
+  const c = $('c3d'); let drag = null;
+  c.addEventListener('pointerdown', e => { drag = [e.clientX, e.clientY]; c.setPointerCapture(e.pointerId); c.style.cursor = 'grabbing'; });
+  c.addEventListener('pointermove', e => { if (!drag) return; view.ry += (e.clientX - drag[0]) * 0.01; view.rx += (e.clientY - drag[1]) * 0.01; drag = [e.clientX, e.clientY]; draw3D(); });
+  c.addEventListener('pointerup', () => { drag = null; c.style.cursor = 'grab'; });
+  c.addEventListener('wheel', e => { e.preventDefault(); view.zoom = Math.min(3, Math.max(0.4, view.zoom * (e.deltaY < 0 ? 1.08 : 0.92))); draw3D(); }, { passive: false });
+  $('resetView').onclick = () => { view.rx = -0.45; view.ry = 0.7; view.zoom = 1; draw3D(); };
+  $('showQ').onchange = draw3D; window.addEventListener('resize', draw3D);
+})();
+
+/* ---------- structure ---------- */
+function fillYb() {
+  const sel = $('ybLabel'); sel.innerHTML = '';
+  ybSites(S.cif).forEach(s => { const o = document.createElement('option'); o.value = s.label; o.textContent = s.label; sel.appendChild(o); });
+}
+function recomputeEnv() {
+  S.res = null;
+  if (!S.cif) return;
+  try {
+    const r = ybEnvironment(S.cif, parseFloat($('cutoff').value) || 3.0, $('ybLabel').value);
+    S.env = r.env; S.yb = r.yb;
+  } catch (e) { S.env = null; setStatus(e.message, true); }
+  renderDonors(); draw3D();
+}
+function renderDonors() {
+  const el = $('donorTable');
+  if (!S.env) { el.innerHTML = ''; return; }
+  let h = '<table style="margin-top:8px"><tr><th>Atom</th><th>Element</th><th>Yb–atom (Å)</th><th>Occupancy</th></tr>';
+  S.env.forEach(u => { h += `<tr><td>${esc(u.label)}</td><td>${u.el}</td><td>${u.r.toFixed(3)}</td><td>${u.occ < 0.99 ? `<span class="bad">${u.occ.toFixed(2)}</span>` : '1'}</td></tr>`; });
+  h += '</table>';
+  if (S.env.length < 3) h += '<div class="warn">Fewer than 3 donors were found. Increase the cutoff or check the CIF.</div>';
+  if (S.env.length > 6) h += `<div class="warn">${S.env.length} donors were found. The paper groups neighbouring atoms into effective charges when there are more than 6. Reduce the cutoff if needed.</div>`;
+  if (S.env.some(u => u.occ < 0.99)) h += '<div class="warn">Partially occupied (disordered) atoms are present. Check whether duplicate atoms on the same site were picked up together.</div>';
+  el.innerHTML = h;
+}
+
+/* ---------- absorption ---------- */
+function detectAbs() {
+  if (!S.abs) return;
+  const lo = parseFloat($('wlo').value), hi = parseFloat($('whi').value), pr = parseFloat($('prom').value) || 0.05;
+  S.peaksAbs = findPeaks(S.abs.E, S.abs.y, lo, hi, pr);
+  $('peakChips').innerHTML = S.peaksAbs.length ? S.peaksAbs.map(p => `<span class="chip">${p.E.toFixed(4)} eV</span>`).join('') : '<span class="hint">No peaks were detected. Adjust the range or the prominence.</span>';
+  const sk = parseInt($('skip').value) || 0;
+  ['t1', 't2', 't3'].forEach((id, i) => { const p = S.peaksAbs[sk + i]; $(id).value = p ? p.E.toFixed(4) : ''; });
+  detectEmi(); renderAbs();
+}
+function targets() { return ['t1', 't2', 't3'].map(id => parseFloat($(id).value)); }
+function renderAbs() {
+  const el = $('absPlot');
+  if (!S.abs) { el.innerHTML = '<div class="empty">Shown after you upload an absorption CSV.</div>'; return; }
+  const t = targets().filter(Number.isFinite);
+  const lo = Math.min(parseFloat($('wlo').value), ...t) - 0.01, hi = Math.max(parseFloat($('whi').value), ...t) + 0.01;
+  const lines = [], marks = [];
+  const yAt = x => { let b = 0; for (let i = 0; i < S.abs.E.length; i++) if (Math.abs(S.abs.E[i] - x) < Math.abs(S.abs.E[b] - x)) b = i; return S.abs.y[b]; };
+  targets().forEach((x, i) => { if (Number.isFinite(x)) marks.push({ x, y: yAt(x), color: '#2f6fed', label: ['E(9,10)', 'E(11,12)', 'E(13,14)'][i] }); });
+  if (S.res) S.res.summary.transitions.forEach((x, i) => lines.push({ x, color: '#d63c2f', label: 'calc ' + x.toFixed(4), dy: i * 13 }));
+  el.innerHTML = spectrumSVG(S.abs, { lo, hi, lines, marks, alt: 'Absorption spectrum', ylabel: 'Absorbance' }) +
+    '<div class="legend"><span class="dot" style="background:#2f6fed"></span>Target peaks (experiment) <span class="dot" style="background:#d63c2f"></span>Calculated transitions (dashed)</div>';
+}
+
+/* ---------- emission ---------- */
+function detectEmi() {
+  const info = $('emiInfo'); S.emi_gap = null;
+  if (!S.emi) { info.innerHTML = ''; $('emiPlot').innerHTML = '<div class="empty">Shown after you upload an emission CSV.</div>'; return; }
+  const ref = targets()[0];
+  const lo = Number.isFinite(ref) ? ref - 0.25 : 1.05, hi = Number.isFinite(ref) ? ref + 0.03 : 1.30;
+  const pk = findPeaks(S.emi.E, S.emi.y, lo, hi, 0.05);
+  let refPk = null;
+  if (Number.isFinite(ref)) pk.forEach(p => { if (Math.abs(p.E - ref) < 0.03 && (!refPk || Math.abs(p.E - ref) < Math.abs(refPk.E - ref))) refPk = p; });
+  let low = null;
+  if (refPk) pk.forEach(p => { if (p.E < refPk.E - 0.015 && (!low || p.E > low.E)) low = p; });
+  const marks = pk.map(p => ({ x: p.E, y: p.h + Math.min(...S.emi.y), color: '#7a3fa0', label: p.E.toFixed(4) }));
+  const ymin = Math.min(...S.emi.y.filter((v, i) => S.emi.E[i] >= lo && S.emi.E[i] <= hi));
+  marks.forEach(m => { m.y = m.y; });
+  $('emiPlot').innerHTML = spectrumSVG(S.emi, { lo, hi, marks: pk.map(p => ({ x: p.E, y: p.h + ymin, color: '#7a3fa0', label: p.E.toFixed(4) })), alt: 'Emission spectrum', ylabel: 'Emission (a.u.)' });
+  if (refPk && low) {
+    S.emi_gap = (refPk.E - low.E) * 1000;
+    info.innerHTML = `<div class="hint">In the emission spectrum, the gap between ${refPk.E.toFixed(4)} eV and ${low.E.toFixed(4)} eV = <b>${S.emi_gap.toFixed(1)} meV</b> was entered as the ground-splitting candidate. It could be a vibrational shoulder, so confirm with a low-temperature measurement.</div>`;
+    $('gs').value = S.emi_gap.toFixed(1);
+  } else info.innerHTML = `<div class="hint">No second line was found near the reference peak. Detected peaks: ${pk.map(p => p.E.toFixed(4)).join(', ') || 'none'}. You can enter the ground splitting manually.</div>`;
+}
+
+/* ---------- run ---------- */
+async function run() {
+  if (!S.env || S.env.length < 3) return setStatus('Upload a CIF first; at least 3 donors are needed.', true);
+  const t = targets();
+  if (!Number.isFinite(t[0]) || t.filter(Number.isFinite).length < 2) return setStatus('Enter E(9,10) and at least one more target. E(11,12) may be left empty if that line is not observed.', true);
+  const gsv = parseFloat($('gs').value), gs = ($('useGs').checked && Number.isFinite(gsv)) ? gsv : null;
+  const fitQ = $('fitQ').checked, xi = parseFloat($('xi').value) || 2870;
+  $('run').disabled = true; setStatus('Fitting… 0/9');
+  try {
+    const xyz = S.env.map(u => u.xyz), els = S.env.map(u => u.el);
+    const tn = t.map(v => Number.isFinite(v) ? v : null);
+    const g = fitGen(xyz, els, tn, gs, fitQ, xi); let st;
+    while (!(st = g.next()).done) { setStatus('Fitting… ' + st.value); await new Promise(r => setTimeout(r, 0)); }
+    S.res = st.value; S.res.targets = tn; S.res.gs = gs;
+    setStatus('Done'); renderAll();
+  } catch (e) { console.error(e); setStatus('Error: ' + e.message, true); }
+  $('run').disabled = false;
+}
+
+/* ---------- results ---------- */
+function levelSVG(r) {
+  const d = r.summary.doublets, g = d.slice(0, 4).map(v => (v - d[0]) / CM_PER_MEV), e = d.slice(4).map(v => (v - d[4]) / CM_PER_MEV);
+  const t = r.targets, gsE = Number.isFinite(r.gs) ? [{ v: r.gs, label: 'expt ' + r.gs.toFixed(1) }] : [];
+  const exE = [];
+  if (t[1] != null) exE.push({ v: (t[1] - t[0]) * 1000, label: 'expt ' + ((t[1] - t[0]) * 1000).toFixed(1) });
+  if (t[2] != null) exE.push({ v: (t[2] - t[0]) * 1000, label: 'expt ' + ((t[2] - t[0]) * 1000).toFixed(1) });
+  const mx = Math.max(g[3], e[2], ...gsE.map(x => x.v), ...exE.map(x => x.v)) * 1.12, W = 640, H = 340, top = 40, bot = 300, Y = v => bot - v / mx * (bot - top);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Calculated energy levels of the ground and excited bands">`;
+  const col = (x0, x1, lv, name, split, exps) => {
+    let o = `<text x="${(x0 + x1) / 2}" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="#1b2430">${name}</text>`;
+    lv.forEach((v, i) => { o += `<line x1="${x0}" y1="${Y(v)}" x2="${x1}" y2="${Y(v)}" stroke="${i < 2 ? '#2f6fed' : '#8a94a3'}" stroke-width="${i < 2 ? 4 : 3}"/><text x="${x1 + 8}" y="${Y(v) + 4}" font-size="12" fill="#3d4756">${v.toFixed(1)} meV</text>`; });
+    const xm = x0 + 18;
+    o += `<line x1="${xm}" y1="${Y(0)}" x2="${xm}" y2="${Y(lv[1])}" stroke="#2f6fed" stroke-width="2"/><text x="${xm + 5}" y="${(Y(0) + Y(lv[1])) / 2 + 4}" font-size="12" font-weight="700" fill="#2f6fed">Δ ${split.toFixed(1)}</text>`;
+    exps.forEach(x => { o += `<line x1="${x0 - 8}" y1="${Y(x.v)}" x2="${x1 + 4}" y2="${Y(x.v)}" stroke="#7a3fa0" stroke-dasharray="5 4" stroke-width="1.6"/><text x="${x0 - 12}" y="${Y(x.v) + 4}" text-anchor="end" font-size="11" fill="#7a3fa0">${x.label}</text>`; });
+    return o;
+  };
+  s += col(90, 230, g, 'Ground ²F₇/₂', r.summary.ground_split, gsE);
+  s += col(400, 540, e, 'Excited ²F₅/₂', r.summary.excited_split, exE);
+  s += `<text x="${W / 2}" y="${H - 8}" text-anchor="middle" font-size="12" fill="#5c6675">Relative to the lowest doublet of each band (meV). Gap between the bands: about ${((d[4] - d[0]) / CM_PER_MEV / 1000).toFixed(3)} eV</text></svg>`;
+  return s + '<div class="legend"><span class="dot" style="background:#2f6fed"></span>Two lowest doublets <span class="dot" style="background:#7a3fa0"></span>Experiment (ground: emission; excited: absorption line spacing from E(9,10))</div>';
+}
+function resultsHTML(r) {
+  const s = r.summary, t = r.targets, names = ['E(9,10)', 'E(11,12)', 'E(13,14)'];
+  const hasT2 = t[1] != null, hasT3 = t[2] != null;
+  let h = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(520px,1fr));gap:24px"><div style="min-width:0;overflow-x:auto">';
+  h += '<table><tr><th>Quantity</th><th>Calculated</th><th>Experiment</th><th>Difference (meV)</th></tr>';
+  h += `<tr><td><b>Ground splitting</b> E(3,4)−E(1,2)</td><td><b>${fmt(s.ground_split, 1)} meV</b></td><td>${Number.isFinite(r.gs) ? fmt(r.gs, 1) + ' meV' : (Number.isFinite(parseFloat($('gs').value)) ? fmt(parseFloat($('gs').value), 1) + ' meV' : '—')}</td><td>${Number.isFinite(parseFloat($('gs').value)) ? fmt(s.ground_split - parseFloat($('gs').value), 1) : '—'}</td></tr>`;
+  h += `<tr><td><b>Excited splitting</b> E(11,12)−E(9,10)</td><td><b>${fmt(s.excited_split, 1)} meV</b></td><td>${hasT2 ? fmt((t[1] - t[0]) * 1000, 1) + ' meV' : '— (not observed)'}</td><td>${hasT2 ? fmt(s.excited_split - (t[1] - t[0]) * 1000, 1) : '—'}</td></tr>`;
+  h += `<tr><td>Total ground-band width</td><td>${fmt(s.ground_total, 1)} meV</td><td>—</td><td>—</td></tr><tr><td>Excited-band width E(13,14)−E(9,10)</td><td>${fmt(s.excited_total, 1)} meV</td><td>${hasT3 ? fmt((t[2] - t[0]) * 1000, 1) + ' meV' : '—'}</td><td>${hasT3 ? fmt(s.excited_total - (t[2] - t[0]) * 1000, 1) : '—'}</td></tr></table>`;
+  h += '<table style="margin-top:14px"><tr><th>Transition (−E(1,2))</th><th>Calculated (eV)</th><th>Experiment (eV)</th><th>Residual (meV)</th></tr>';
+  names.forEach((n, i) => { if (t[i] == null) { h += `<tr><td>${n}</td><td>${s.transitions[i].toFixed(4)}</td><td>not used</td><td>—</td></tr>`; return; } const rs = r.resid3[i]; h += `<tr><td>${n}</td><td>${s.transitions[i].toFixed(4)}</td><td>${t[i].toFixed(4)}</td><td class="${Math.abs(rs) > 5 ? 'bad' : 'good'}">${rs.toFixed(2)}</td></tr>`; });
+  h += '</table></div><div style="min-width:0;overflow-x:auto">';
+  h += '<table><tr><th>Charges used</th><th>Element</th><th>Charge (e)</th></tr>';
+  S.env.forEach((u, i) => { h += `<tr><td>${esc(u.label)}</td><td>${u.el}</td><td>${r.charges[i].toFixed(3)}</td></tr>`; });
+  h += `</table><div class="hint">Fitted ⟨r^k⟩ = a·ρ^k: a = ${r.a.toPrecision(4)}, ρ = ${r.rho.toFixed(4)}${r.f != null ? `, halide charge factor = ${r.f.toFixed(3)}` : ''}</div>`;
+  h += '</div></div>';
+  const w = [];
+  if (r.nTargets <= r.nParams) w.push(`${r.nTargets} targets were used to fit ${r.nParams} parameters. The fit is under-determined, so the splittings are only indicative.`);
+  else if (r.nTargets - r.nParams === 1) w.push('There is only 1 more target than parameters. With almost no degrees of freedom, do not over-trust the result.');
+  if (r.atBounds) w.push('A fit parameter reached the end of its allowed range. The fit has probably failed. Check the target-peak assignment (peaks to skip).');
+  if (Math.max(...r.residuals.map(Math.abs)) > 10) w.push('A residual is larger than 10 meV. The point-charge model includes neither covalency nor vibrations, so that line may not be described well. Prefer the splitting read directly from experiment where possible.');
+  if (r.canQ) w.push('The charge split and ⟨r^k⟩ are correlated, so the individual values have little physical meaning.');
+  w.push('Room-temperature lines are broad and mixed with hot bands. Low-temperature emission or absorption is needed to confirm the ground splitting.');
+  h += w.map(x => `<div class="warn">${esc(x)}</div>`).join('');
+  h += '<div class="toolbar"><button id="dlJson" type="button">Save results as JSON</button><button id="dlCsv" type="button">Save results as CSV</button></div>';
+  return h;
+}
+function download(name, text, type) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); }
+function renderAll() {
+  const r = S.res; if (!r) return;
+  $('levelPlot').innerHTML = levelSVG(r);
+  $('results').innerHTML = resultsHTML(r);
+  renderAbs(); draw3D();
+  $('dlJson').onclick = () => download('socf_results.json', JSON.stringify({ donors: S.env.map((u, i) => ({ label: u.label, el: u.el, r_A: u.r, charge: r.charges[i] })), targets_eV: r.targets, ground_target_meV: r.gs, a: r.a, rho: r.rho, ground_split_meV: r.summary.ground_split, excited_split_meV: r.summary.excited_split, transitions_eV: r.summary.transitions, residuals_meV: r.residuals, doublets_cm: r.summary.doublets }, null, 2), 'application/json');
+  $('dlCsv').onclick = () => download('socf_results.csv', 'item,calc,expt\nground_split_meV,' + r.summary.ground_split + ',' + (r.gs ?? '') + '\nexcited_split_meV,' + r.summary.excited_split + ',' + (r.targets[1] != null ? (r.targets[1] - r.targets[0]) * 1000 : '') + '\nexcited_band_width_meV,' + r.summary.excited_total + ',' + (r.targets[2] != null ? (r.targets[2] - r.targets[0]) * 1000 : '') + '\n' + r.summary.transitions.map((v, i) => `E${['9_10', '11_12', '13_14'][i]}_eV,${v},${r.targets[i] ?? ''}`).join('\n') + '\n', 'text/csv');
+}
+
+/* ---------- events ---------- */
+$('cif').onchange = async e => { const f = e.target.files[0]; if (!f) return; try { S.cif = readCIF(await readText(f)); fillYb(); recomputeEnv(); setStatus('CIF read: ' + f.name + (S.env ? ` · ${S.env.length} donors` : '')); } catch (err) { setStatus('CIF error: ' + err.message, true); } };
+$('cutoff').onchange = recomputeEnv; $('ybLabel').onchange = recomputeEnv;
+async function loadAbs() { const f = $('absf').files[0]; if (!f) return; try { S.abs = parseSpectrum(await readText(f), $('absUnit').value); detectAbs(); setStatus('Absorption spectrum read: ' + f.name + ` · ${S.peaksAbs.length} peaks`); } catch (err) { setStatus('Absorption CSV error: ' + err.message, true); } }
+async function loadEmi() { const f = $('emif').files[0]; if (!f) return; try { S.emi = parseSpectrum(await readText(f), $('emiUnit').value); detectEmi(); setStatus('Emission spectrum read: ' + f.name); } catch (err) { setStatus('Emission CSV error: ' + err.message, true); } }
+$('absf').onchange = loadAbs; $('absUnit').onchange = loadAbs; $('emif').onchange = loadEmi; $('emiUnit').onchange = loadEmi;
+$('redetect').onclick = detectAbs;
+['t1', 't2', 't3'].forEach(id => $(id).oninput = () => { renderAbs(); if (S.emi) detectEmi(); });
+$('run').onclick = run;
+$('demo').onclick = () => {
+  const rows = [['', 1.4348, 0.8262, 0.9240], ['', 1.0895, -1.8056, -0.2398], ['', -1.3784, 1.4259, 0.1222], ['', -1.5085, -1.2469, -0.1051], ['', 1.4969, 0.8908, -2.4338], ['', 0.5410, -0.7578, 2.4844]];
+  S.cif = null; S.yb = { label: 'Yb' };
+  const labs = ['Cl1', 'O1', 'O2', 'O3', 'S1', 'S2'], els6 = ['Cl', 'O', 'O', 'O', 'S', 'S'];
+  S.env = rows.map((r, i) => ({ label: labs[i], el: els6[i], xyz: [r[1], r[2], r[3]], r: Math.hypot(r[1], r[2], r[3]), occ: 1 }));
+  S.res = null; $('ybLabel').innerHTML = '<option>Yb</option>';
+  $('t1').value = '1.2645'; $('t2').value = '1.3427'; $('t3').value = '1.3830'; $('gs').value = '66.0'; $('fitQ').checked = false;
+  S.abs = null; S.emi = null; $('peakChips').innerHTML = ''; renderAbs(); detectEmi(); renderDonors(); draw3D();
+  setStatus('Example loaded. The coordinates are the 6 donor positions of SI Table S10, but the element assignment (1 Cl, 3 O, 2 S) is a simplification, so the charges differ from the paper and the results will not match the values in the paper. Run the calculation to see how the tool works.');
+};
+draw3D();
+
+<\/script>
+</body>
+</html>
+</script>
+<script type="text/plain" id="src2"><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oscillator Strength Calculator</title>
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--ink:#1b2430;--mute:#5c6675;--line:#dfe4ea;--blue:#2f6fed;--red:#d63c2f;--green:#17734a;--orange:#b8501a;--navy:#14213d;--purple:#7a3fa0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-size:14px;line-height:1.45}
+header{background:var(--navy);color:#fff;padding:14px 24px;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+header h1{margin:0;font-size:20px}
+header .sub{color:#b9c4d6;font-size:13px}
+.layout{display:grid;grid-template-columns:360px minmax(0,1fr);gap:20px;padding:20px;max-width:1500px;margin:0 auto}
+@media(max-width:1000px){.layout{grid-template-columns:minmax(0,1fr)}}
+aside,main{display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel,.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-width:0}
+.panel h2,.card h2{margin:0 0 10px;font-size:14px;font-weight:700}
+label{display:block;font-size:12px;color:var(--mute);margin:8px 0 3px}
+input[type=text],input[type=number],select{width:100%;padding:6px 8px;border:1px solid #c9d1db;border-radius:8px;font:inherit;background:#fff;color:var(--ink)}
+input[type=file]{width:100%;font-size:12px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.hint{font-size:12px;color:var(--mute);margin-top:6px}
+.tabs{display:flex;gap:6px;margin-bottom:6px}
+.tab{flex:1;padding:7px 8px;border:1px solid #c9d1db;border-radius:8px;background:#fff;cursor:pointer;font:inherit;color:var(--ink)}
+.tab.on{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+button.run{width:100%;margin-top:12px;padding:10px;border:0;border-radius:10px;background:var(--blue);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+button.sec{padding:6px 12px;border:1px solid #c9d1db;border-radius:8px;background:#fff;font:inherit;cursor:pointer;color:var(--ink)}
+.status{font-size:13px;color:var(--mute);margin-top:10px;padding:8px 10px;background:#eef3ff;border-radius:8px}
+.status.err{background:#fdeceb;color:#8f2a20}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+th{color:var(--mute);font-weight:600;font-size:12px}
+tr.key td{background:#f2f6ff;font-weight:700}
+.tablewrap{overflow-x:auto}
+.warn{background:#fff6e5;border:1px solid #f1d199;color:#6b4300;border-radius:8px;padding:8px 10px;margin-top:8px;font-size:13px}
+svg{width:100%;height:auto;display:block}
+.legend{font-size:12px;color:var(--mute);margin-top:6px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin:0 4px 0 10px;vertical-align:middle}
+.dot:first-child{margin-left:0}
+.formulas{font-size:13px;color:#2b3645}
+.formulas code{background:#f0f3f7;border-radius:4px;padding:1px 5px;font-size:12.5px}
+.formulas li{margin:5px 0}
+.empty{color:var(--mute);font-size:13px;padding:28px 8px;text-align:center}
+.toolbar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<div class="layout">
+<aside>
+  <div class="panel">
+    <h2>1. Sample</h2>
+    <label for="solv">Solvent</label>
+    <select id="solv"></select>
+    <div class="row">
+      <div><label for="nr">Refractive index n<sub>r</sub></label><input type="number" id="nr" step="0.001" value="1.406"></div>
+      <div><label for="conc">Concentration (mM)</label><input type="number" id="conc" step="any" value="5.72666"></div>
+    </div>
+    <div class="row">
+      <div><label for="plen">Path length L (cm)</label><input type="number" id="plen" step="any" value="1"></div>
+      <div><label for="lam0">Peak wavelength (nm)</label><input type="number" id="lam0" step="any" value="981"></div>
+    </div>
+    <div class="hint">Preset indices are sodium D-line values. Enter the index at your wavelength if you know it.</div>
+  </div>
+
+  <div class="panel">
+    <h2>2. Input</h2>
+    <div class="tabs"><button class="tab on" id="tabS" type="button">From spectrum</button><button class="tab" id="tabM" type="button">From peak parameters</button></div>
+
+    <div id="modeS">
+      <label for="file">Absorption spectrum CSV (two columns: x, y)</label>
+      <input type="file" id="file" accept=".csv,.txt,.dat">
+      <div class="row">
+        <div><label for="xunit">x axis unit</label>
+          <select id="xunit"><option value="nm">nm</option><option value="ev">eV</option><option value="cm">cm⁻¹</option><option value="thz">THz</option></select></div>
+        <div><label for="ytype">y axis</label>
+          <select id="ytype"><option value="log10">Absorbance A (log10)</option><option value="ln">−ln(T) (natural)</option></select></div>
+      </div>
+      <div class="row">
+        <div><label for="hw">Fit window ± (nm)</label><input type="number" id="hw" step="any" value="6"></div>
+        <div><label for="base">Baseline</label><select id="base"><option value="2">Linear (offset + slope)</option><option value="1">Constant offset</option><option value="0">None (zero)</option></select></div>
+      </div>
+      <div class="hint">The window is centred on the peak wavelength above. Both a Lorentzian and a Gaussian are fitted inside it. The defaults (±6 nm, linear baseline) follow your MATLAB script.</div>
+    </div>
+
+    <div id="modeM" hidden>
+      <div class="row">
+        <div><label for="pk">Peak height</label><input type="number" id="pk" step="any" value="0.18"></div>
+        <div><label for="mytype">Peak height is</label>
+          <select id="mytype"><option value="ln">−ln(T) (natural)</option><option value="log10">Absorbance A (log10)</option></select></div>
+      </div>
+      <div class="row">
+        <div><label for="fw">FWHM</label><input type="number" id="fw" step="any" value="708.65"></div>
+        <div><label for="fwu">FWHM unit</label>
+          <select id="fwu"><option value="ghz">GHz</option><option value="thz">THz</option><option value="nm">nm</option><option value="cm">cm⁻¹</option><option value="mev">meV</option></select></div>
+      </div>
+      <div class="hint">Both line shapes are evaluated with the same peak height and FWHM.</div>
+    </div>
+
+    <button class="run" id="run" type="button">Calculate</button>
+    <div class="status" id="status">Upload a spectrum or switch to "From peak parameters".</div>
+  </div>
+</aside>
+
+<main>
+  <div class="card" id="plotCard">
+    <h2>Spectrum and fits</h2>
+    <div id="plot"><div class="empty">The fit is shown here after you run a calculation from a spectrum.</div></div>
+    <div class="legend" id="plotLegend"></div>
+  </div>
+  <div class="card">
+    <h2>Results</h2>
+    <div id="results"><div class="empty">No results yet.</div></div>
+    <div class="toolbar"><button class="sec" id="dlCsv" type="button" disabled>Download results as CSV</button></div>
+  </div>
+  <div class="card formulas">
+    <h2>How it is calculated</h2>
+    <ol style="margin:0;padding-left:18px">
+      <li>Absorption coefficient: <code>α = −ln(I<sub>out</sub>/I<sub>in</sub>)/L</code>. A log10 absorbance is multiplied by ln 10 first.</li>
+      <li>The spectrum is converted to frequency (<code>ν = c/λ</code>) and fitted in the window with <code>α(ν) = A·g(ν; ν<sub>0</sub>, FWHM) + offset</code>. The Lorentzian is <code>g = (w/2)² / ((ν−ν<sub>0</sub>)² + (w/2)²)</code>. The Gaussian is <code>g = exp(−4 ln2 (ν−ν<sub>0</sub>)²/w²)</code>.</li>
+      <li>Integral over angular frequency ω = 2πν: <code>∫α dω = 2π·A·(π/2)·w</code> (Lorentzian) or <code>2π·A·w·√(π/(4 ln2))</code> (Gaussian).</li>
+      <li>Absorption cross section: <code>∫σ dω = ∫α dω / N</code>, with <code>N = c<sub>mM</sub> · N<sub>A</sub></code> molecules per m³ (1 mM = 1 mol/m³).</li>
+      <li>Oscillator strength: <code>f<sub>12</sub> = (2ε<sub>0</sub> m c n<sub>r</sub> / (π e²)) · ∫σ dω</code>, the same prefactor as in your slides. SI units are used throughout.</li>
+    </ol>
+  </div>
+</main>
+</div>
+
+<script>
+const C = { eps0: 8.8541878128e-12, me: 9.1093837015e-31, c: 299792458, e: 1.602176634e-19, NA: 6.02214076e23, h: 6.62607015e-34 };
+const THZ_PER_EV = 241.79892; // ν[THz] = E[eV] × 241.79892
+const $ = id => document.getElementById(id);
+const SOLVENTS = [['2-MeTHF', 1.406], ['THF', 1.407], ['Toluene', 1.497], ['Acetonitrile', 1.344], ['Dichloromethane', 1.424], ['Hexane', 1.375], ['Ethanol', 1.361], ['DMSO', 1.479], ['Water', 1.333], ['Custom', null]];
+
+/* ---------- physics ---------- */
+function prefactor(nr) { return 2 * C.eps0 * C.me * C.c * nr / (C.e * C.e * Math.PI); }          // m^-2 s
+function density(cmM) { return cmM * C.NA; }                                                    // m^-3 (1 mM = 1 mol/m^3)
+function oscillator(intAlphaDw, N, nr) { const sig = intAlphaDw / N; return { sigInt: sig, f: prefactor(nr) * sig }; }
+const SHAPE_AREA = { lor: Math.PI / 2, gau: Math.sqrt(Math.PI / (4 * Math.LN2)) };             // area = A · w · factor
+function shapeVal(kind, nu, nu0, w) { const d = nu - nu0; return kind === 'lor' ? (w * w / 4) / (d * d + w * w / 4) : Math.exp(-4 * Math.LN2 * d * d / (w * w)); }
+function fwhmToTHz(v, unit, lam0nm) {
+  const nu0 = C.c / (lam0nm * 1e-9) / 1e12;
+  if (unit === 'ghz') return v / 1000;
+  if (unit === 'thz') return v;
+  if (unit === 'nm') return nu0 * v / lam0nm;
+  if (unit === 'cm') return v * C.c * 100 / 1e12;
+  if (unit === 'mev') return v / 1000 * THZ_PER_EV;
+  return NaN;
+}
+function summarize(kind, A, nu0, wTHz, base, N, nr, L) {   // A in m^-1, nu0 and w in THz
+  const wHz = wTHz * 1e12, intNu = A * SHAPE_AREA[kind] * wHz, intW = 2 * Math.PI * intNu, o = oscillator(intW, N, nr);
+  const lam0 = C.c / (nu0 * 1e12) * 1e9;
+  return { A, nu0, lam0, wTHz, wGHz: wTHz * 1e3, wNm: lam0 * wTHz / nu0, wCm: wHz / (C.c * 100), wMeV: wTHz / THZ_PER_EV * 1000,
+    peakAL: A * L, epsilon: A / 100 / Math.LN10 / (N / C.NA / 1000), sigma0cm2: A / N * 1e4, intW, sigInt: o.sigInt, f: o.f, base };
+}
+
+/* ---------- parsing and fitting ---------- */
+function parseSpectrum(text) {
+  const x = [], y = [];
+  text.split(/\r?\n/).forEach(l => { const p = l.trim().split(/[,\t;\s]+/).map(Number); if (p.length >= 2 && Number.isFinite(p[0]) && Number.isFinite(p[1])) { x.push(p[0]); y.push(p[1]); } });
+  return { x, y };
+}
+function toTHz(x, unit) { return unit === 'nm' ? C.c / (x * 1e-9) / 1e12 : unit === 'ev' ? x * THZ_PER_EV : unit === 'cm' ? x * C.c * 100 / 1e12 : x; }
+function solveSmall(M, v) {   // Gaussian elimination for a tiny symmetric system
+  const n = v.length, A = M.map((r, i) => r.concat([v[i]]));
+  for (let c = 0; c < n; c++) { let p = c; for (let r = c + 1; r < n; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r; if (Math.abs(A[p][c]) < 1e-30) return null; [A[c], A[p]] = [A[p], A[c]]; for (let r = 0; r < n; r++) if (r !== c) { const f = A[r][c] / A[c][c]; for (let k = c; k <= n; k++) A[r][k] -= f * A[c][k]; } }
+  return A.map((r, i) => r[n] / r[i]);
+}
+function innerFit(kind, nu, a, nu0, w, mode, ref) {   // mode 0: no baseline, 1: constant offset, 2: offset + slope (ν − ref)
+  const n = nu.length, m = 1 + mode, M = Array.from({ length: m }, () => new Array(m).fill(0)), v = new Array(m).fill(0), row = new Array(m);
+  for (let i = 0; i < n; i++) { row[0] = shapeVal(kind, nu[i], nu0, w); if (mode >= 1) row[1] = 1; if (mode >= 2) row[2] = nu[i] - ref; for (let r = 0; r < m; r++) { v[r] += row[r] * a[i]; for (let q = 0; q < m; q++) M[r][q] += row[r] * row[q]; } }
+  const x = solveSmall(M, v); if (!x) return null;
+  const A = x[0], c = mode >= 1 ? x[1] : 0, s = mode >= 2 ? x[2] : 0;
+  let sse = 0; for (let i = 0; i < n; i++) { const r = a[i] - (A * shapeVal(kind, nu[i], nu0, w) + c + s * (nu[i] - ref)); sse += r * r; }
+  return { A, c, s, sse };
+}
+function erf(x) { const s = x < 0 ? -1 : 1, t = 1 / (1 + 0.3275911 * Math.abs(x)); x = Math.abs(x); return s * (1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x)); }
+function areaInWindow(kind, nu0, w, lo, hi) {   // fraction (0-1) of the fitted line shape inside [lo, hi] THz
+  if (kind === 'lor') return (Math.atan(2 * (hi - nu0) / w) - Math.atan(2 * (lo - nu0) / w)) / Math.PI;
+  const k = 2 * Math.sqrt(Math.LN2) / w; return 0.5 * (erf((hi - nu0) * k) - erf((lo - nu0) * k));
+}
+function nelderMead2(f, p0, step, iters) {
+  let S = [p0, [p0[0] + step[0], p0[1]], [p0[0], p0[1] + step[1]]].map(p => ({ p, v: f(p) }));
+  for (let k = 0; k < iters; k++) {
+    S.sort((a, b) => a.v - b.v);
+    const [b, m, w] = S, cen = [(b.p[0] + m.p[0]) / 2, (b.p[1] + m.p[1]) / 2], mk = t => { const p = [cen[0] + t * (w.p[0] - cen[0]), cen[1] + t * (w.p[1] - cen[1])]; return { p, v: f(p) }; };
+    const r = mk(-1);
+    if (r.v < b.v) { const e = mk(-2); S[2] = e.v < r.v ? e : r; }
+    else if (r.v < m.v) S[2] = r;
+    else { const c = mk(r.v < w.v ? -0.5 : 0.5); if (c.v < Math.min(r.v, w.v)) S[2] = c; else { S[1] = { p: [(b.p[0] + m.p[0]) / 2, (b.p[1] + m.p[1]) / 2], v: 0 }; S[1].v = f(S[1].p); S[2] = { p: [(b.p[0] + w.p[0]) / 2, (b.p[1] + w.p[1]) / 2], v: 0 }; S[2].v = f(S[2].p); } }
+    if (Math.abs(S[0].v - S[2].v) < 1e-18 * (1 + Math.abs(S[0].v)) && k > 20) break;
+  }
+  S.sort((a, b) => a.v - b.v); return S[0].p;
+}
+function fitLine(kind, nu, a, nuGuess, wGuess, withBase, ref) {
+  const span = nu[nu.length - 1] - nu[0];
+  const f = p => { const [n0, w] = p; if (!(w > span * 1e-4) || w > span * 4 || n0 < nu[0] - span || n0 > nu[nu.length - 1] + span) return Infinity; const r = innerFit(kind, nu, a, n0, w, withBase, ref); return r && r.A > 0 ? r.sse : Infinity; };
+  let best = null;
+  [1, 0.5, 2].forEach(m => { const p = nelderMead2(f, [nuGuess, wGuess * m], [span * 0.03, wGuess * 0.3 * m], 400), v = f(p); if (Number.isFinite(v) && (!best || v < best.v)) best = { p, v }; });
+  if (!best) return null;
+  const r = innerFit(kind, nu, a, best.p[0], best.p[1], withBase, ref);
+  const mean = a.reduce((s, v) => s + v, 0) / a.length, sst = a.reduce((s, v) => s + (v - mean) * (v - mean), 0);
+  return { nu0: best.p[0], w: best.p[1], A: r.A, c: r.c, s: r.s, rmse: Math.sqrt(r.sse / nu.length), r2: sst > 0 ? 1 - r.sse / sst : NaN };
+}
+
+/* ---------- state and UI ---------- */
+const S = { mode: 'S', data: null, res: null };
+const fmtSci = (x, d = 4) => { if (!Number.isFinite(x)) return '—'; if (x === 0) return '0'; const [m, e] = x.toExponential(d).split('e'); return `${m}×10<sup>${parseInt(e, 10)}</sup>`; };
+const fmtNum = (x, d = 4) => Number.isFinite(x) ? x.toFixed(d) : '—';
+const setStatus = (t, err) => { const s = $('status'); s.textContent = t; s.className = 'status' + (err ? ' err' : ''); };
+SOLVENTS.forEach(([n, v]) => { const o = document.createElement('option'); o.value = n; o.textContent = v ? `${n} (${v})` : n; $('solv').appendChild(o); });
+$('solv').onchange = () => { const s = SOLVENTS.find(x => x[0] === $('solv').value); if (s && s[1]) $('nr').value = s[1]; };
+$('nr').oninput = () => { const s = SOLVENTS.find(x => x[1] === parseFloat($('nr').value)); $('solv').value = s ? s[0] : 'Custom'; };
+$('solv').value = '2-MeTHF';
+function setMode(m) { S.mode = m; $('modeS').hidden = m !== 'S'; $('modeM').hidden = m !== 'M'; $('tabS').classList.toggle('on', m === 'S'); $('tabM').classList.toggle('on', m === 'M'); }
+$('tabS').onclick = () => setMode('S'); $('tabM').onclick = () => setMode('M');
+$('file').onchange = e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { S.data = parseSpectrum(r.result); setStatus(S.data.x.length ? `Loaded ${S.data.x.length} points from ${f.name}.` : 'No numeric two-column data found in that file.', !S.data.x.length); }; r.readAsText(f); };
+
+function readCommon() {
+  const nr = parseFloat($('nr').value), conc = parseFloat($('conc').value), Lcm = parseFloat($('plen').value), lam0 = parseFloat($('lam0').value);
+  if (![nr, conc, Lcm, lam0].every(v => Number.isFinite(v) && v > 0)) throw new Error('Enter positive values for refractive index, concentration, path length and peak wavelength.');
+  return { nr, conc, L: Lcm / 100, lam0, N: density(conc) };
+}
+function runSpectrum(p) {
+  if (!S.data || S.data.x.length < 8) throw new Error('Upload a spectrum CSV first.');
+  const hw = parseFloat($('hw').value); if (!(hw > 0)) throw new Error('Enter a positive fit window.');
+  const unit = $('xunit').value, k = $('ytype').value === 'log10' ? Math.LN10 : 1, withBase = parseInt($('base').value, 10);
+  let pts = S.data.x.map((x, i) => ({ nu: toTHz(x, unit), al: S.data.y[i] * k / p.L })).filter(q => Number.isFinite(q.nu) && Number.isFinite(q.al)).sort((a, b) => a.nu - b.nu);
+  const lo = C.c / ((p.lam0 + hw) * 1e-9) / 1e12, hi = C.c / ((p.lam0 - hw) * 1e-9) / 1e12;
+  const win = pts.filter(q => q.nu >= lo && q.nu <= hi);
+  if (win.length < 8) throw new Error(`Only ${win.length} points fall in the window. Check the x unit or widen the window.`);
+  const nu = win.map(q => q.nu), al = win.map(q => q.al), nuG = C.c / (p.lam0 * 1e-9) / 1e12;
+  const mn = Math.min(...al), mx = Math.max(...al), half = mn + (mx - mn) / 2, above = nu.filter((v, i) => al[i] >= half);
+  const wG = above.length > 2 ? Math.max(above[above.length - 1] - above[0], (hi - lo) / 40) : (hi - lo) / 6;
+  const out = { all: pts, win, lo, hi, nuG, withBase, ref: nuG };
+  out.lor = fitLine('lor', nu, al, nuG, wG, withBase, nuG); out.gau = fitLine('gau', nu, al, nuG, wG, withBase, nuG);
+  if (!out.lor || !out.gau) throw new Error('The fit did not converge. Check the peak wavelength and the window.');
+  const bl = nu.map(v => (out.lor.c || 0) + (out.lor.s || 0) * (v - nuG)); let intN = 0; for (let i = 1; i < nu.length; i++) intN += 0.5 * ((al[i] - bl[i]) + (al[i - 1] - bl[i - 1])) * (nu[i] - nu[i - 1]) * 1e12;
+  out.numInt = 2 * Math.PI * intN;
+  out.sum = { lor: summarize('lor', out.lor.A, out.lor.nu0, out.lor.w, out.lor.c, p.N, p.nr, p.L), gau: summarize('gau', out.gau.A, out.gau.nu0, out.gau.w, out.gau.c, p.N, p.nr, p.L) };
+  out.sum.lor.rmse = out.lor.rmse * p.L; out.sum.gau.rmse = out.gau.rmse * p.L; out.sum.lor.slope = out.lor.s; out.sum.gau.slope = out.gau.s; out.sum.lor.r2 = out.lor.r2; out.sum.gau.r2 = out.gau.r2;
+  out.sum.lor.area = areaInWindow('lor', out.lor.nu0, out.lor.w, lo, hi) * 100; out.sum.gau.area = areaInWindow('gau', out.gau.nu0, out.gau.w, lo, hi) * 100;
+  const on = oscillator(out.numInt, p.N, p.nr); out.num = { intW: out.numInt, sigInt: on.sigInt, f: on.f };
+  return out;
+}
+function runManual(p) {
+  const pk = parseFloat($('pk').value), fw = parseFloat($('fw').value); if (!(pk > 0 && fw > 0)) throw new Error('Enter a positive peak height and FWHM.');
+  const A = pk * ($('mytype').value === 'log10' ? Math.LN10 : 1) / p.L, nu0 = C.c / (p.lam0 * 1e-9) / 1e12, w = fwhmToTHz(fw, $('fwu').value, p.lam0);
+  return { manual: true, sum: { lor: summarize('lor', A, nu0, w, 0, p.N, p.nr, p.L), gau: summarize('gau', A, nu0, w, 0, p.N, p.nr, p.L) } };
+}
+
+function plotSVG(r, p) {
+  const W = 760, H = 330, ml = 56, mr = 28, mt = 16, mb = 44, win = r.win, pad = (r.hi - r.lo) * 0.02;
+  const x0 = r.lo - pad, x1 = r.hi + pad, ys = win.map(q => q.al * p.L), ymax = Math.max(...ys) * 1.12, ymin = Math.min(0, ...ys) * 1.1;
+  const X = v => ml + (v - x0) / (x1 - x0) * (W - ml - mr), Y = v => H - mb - (v - ymin) / (ymax - ymin) * (H - mt - mb);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Absorption spectrum with Lorentzian and Gaussian fits"><rect x="${ml}" y="${mt}" width="${W - ml - mr}" height="${H - mt - mb}" fill="#fff" stroke="#c9d1db"/>`;
+  for (let i = 0; i <= 5; i++) { const v = x0 + (x1 - x0) * i / 5; s += `<line x1="${X(v)}" y1="${mt}" x2="${X(v)}" y2="${H - mb}" stroke="#eef1f5"/><text x="${X(v)}" y="${H - mb + 16}" text-anchor="middle" font-size="11" fill="#5c6675">${v.toFixed(1)}</text><text x="${X(v)}" y="${H - mb + 29}" text-anchor="middle" font-size="10" fill="#8a94a3">${(C.c / (v * 1e12) * 1e9).toFixed(0)} nm</text>`; }
+  for (let i = 0; i <= 4; i++) { const v = ymin + (ymax - ymin) * i / 4; s += `<line x1="${ml}" y1="${Y(v)}" x2="${W - mr}" y2="${Y(v)}" stroke="#eef1f5"/><text x="${ml - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="11" fill="#5c6675">${v.toFixed(3)}</text>`; }
+  s += `<text x="${(ml + W - mr) / 2}" y="${H - 4}" text-anchor="middle" font-size="12" fill="#3d4756">Frequency (THz)</text><text transform="translate(14 ${(mt + H - mb) / 2}) rotate(-90)" text-anchor="middle" font-size="12" fill="#3d4756">αL = −ln(I<tspan font-size="9" dy="3">out</tspan><tspan dy="-3">/I</tspan><tspan font-size="9" dy="3">in</tspan><tspan dy="-3">)</tspan></text>`;
+  win.forEach(q => { s += `<circle cx="${X(q.nu)}" cy="${Y(q.al * p.L)}" r="2" fill="#2f6fed" fill-opacity=".55"/>`; });
+  const curve = (kind, f, color) => { let d = ''; for (let i = 0; i <= 240; i++) { const v = r.lo + (r.hi - r.lo) * i / 240; d += (i ? 'L' : 'M') + X(v).toFixed(1) + ' ' + Y((f.A * shapeVal(kind, v, f.nu0, f.w) + f.c + f.s * (v - r.ref)) * p.L).toFixed(1); } return `<path d="${d}" fill="none" stroke="${color}" stroke-width="2"/>`; };
+  s += curve('gau', r.gau, '#17734a') + curve('lor', r.lor, '#d63c2f');
+  s += `<line x1="${X(r.nuG)}" y1="${mt}" x2="${X(r.nuG)}" y2="${H - mb}" stroke="#7a3fa0" stroke-dasharray="4 4"/></svg>`;
+  return s;
+}
+
+function resultsHTML(r, p) {
+  const L = r.sum.lor, G = r.sum.gau, man = !!r.manual;
+  const row = (name, a, b, key) => `<tr${key ? ' class="key"' : ''}><td>${name}</td><td>${a}</td><td>${b}</td></tr>`;
+  let h = `<div class="tablewrap"><table><tr><th>Quantity</th><th>Lorentzian</th><th>Gaussian</th></tr>`;
+  h += row('Oscillator strength f<sub>12</sub>', fmtSci(L.f), fmtSci(G.f), 1);
+  h += row('∫σ(ω) dω (m² s⁻¹)', fmtSci(L.sigInt), fmtSci(G.sigInt), 1);
+  h += row('FWHM (GHz)', fmtNum(L.wGHz, 2), fmtNum(G.wGHz, 2), 1);
+  h += row('FWHM (nm)', fmtNum(L.wNm, 3), fmtNum(G.wNm, 3));
+  h += row('FWHM (cm⁻¹)', fmtNum(L.wCm, 2), fmtNum(G.wCm, 2));
+  h += row('FWHM (meV)', fmtNum(L.wMeV, 3), fmtNum(G.wMeV, 3));
+  h += row('Centre ν<sub>0</sub> (THz)', fmtNum(L.nu0, 3), fmtNum(G.nu0, 3));
+  h += row('Centre λ<sub>0</sub> (nm)', fmtNum(L.lam0, 2), fmtNum(G.lam0, 2));
+  h += row('Peak α (m⁻¹)', fmtNum(L.A, 3), fmtNum(G.A, 3));
+  h += row('Peak αL', fmtNum(L.peakAL, 4), fmtNum(G.peakAL, 4));
+  h += row('Peak ε (M⁻¹ cm⁻¹)', fmtNum(L.epsilon, 2), fmtNum(G.epsilon, 2));
+  h += row('Peak σ (cm²)', fmtSci(L.sigma0cm2), fmtSci(G.sigma0cm2));
+  h += row('∫α(ω) dω (m⁻¹ s⁻¹)', fmtSci(L.intW), fmtSci(G.intW));
+  if (!man) { h += row('Fit offset (m⁻¹)', fmtNum(L.base, 3), fmtNum(G.base, 3)); h += row('Fit baseline slope (m⁻¹ per THz)', fmtNum(L.slope, 3), fmtNum(G.slope, 3)); h += row('Fit RMSE (αL units)', fmtSci(L.rmse, 2), fmtSci(G.rmse, 2)); h += row('Fit R²', fmtNum(L.r2, 5), fmtNum(G.r2, 5)); h += row('Line-shape area inside the window', fmtNum(L.area, 1) + ' %', fmtNum(G.area, 1) + ' %'); }
+  h += '</table></div>';
+  if (!man) h += `<div class="hint" style="margin-top:10px">Numerical window integral (trapezoid on the data, offset removed, no extrapolation of the tails): ∫α dω = ${fmtSci(r.num.intW)} m⁻¹s⁻¹, ∫σ dω = ${fmtSci(r.num.sigInt)} m²s⁻¹, f<sub>12</sub> = ${fmtSci(r.num.f)}. The fitted values above integrate the whole line shape, so they are larger when the window area is below 100 %.</div>`;
+  h += `<div class="hint">Constants: prefactor 2ε₀ m c n<sub>r</sub>/(e²π) = ${fmtSci(prefactor(p.nr))} m⁻² s, N = ${fmtSci(p.N)} m⁻³, L = ${p.L * 100} cm.</div>`;
+  if (!man) {
+    if (Math.abs(L.nu0 - r.nuG) > (r.hi - r.lo) / 4) h += '<div class="warn">The fitted centre is far from the peak wavelength you entered. Check that the peak and the window are right.</div>';
+    if (L.rmse * p.L > 0.2 * L.peakAL) h += '<div class="warn">The fit residual is large compared with the peak. Try a narrower window or a different baseline setting.</div>';
+    if ($('ytype').value === 'ln' && Math.max(...r.win.map(q => q.al * p.L)) > 3) h += '<div class="warn">The peak value is above 3 in −ln(T). If your instrument reports log10 absorbance, change the y axis setting.</div>';
+  }
+  return h;
+}
+
+function csvOf(r, p) {
+  const L = r.sum.lor, G = r.sum.gau, rows = [['quantity', 'lorentzian', 'gaussian'], ['f12', L.f, G.f], ['int_sigma_domega_m2_per_s', L.sigInt, G.sigInt], ['fwhm_GHz', L.wGHz, G.wGHz], ['fwhm_nm', L.wNm, G.wNm], ['fwhm_cm-1', L.wCm, G.wCm], ['fwhm_meV', L.wMeV, G.wMeV], ['center_THz', L.nu0, G.nu0], ['center_nm', L.lam0, G.lam0], ['peak_alpha_per_m', L.A, G.A], ['peak_epsilon_M-1cm-1', L.epsilon, G.epsilon], ['peak_sigma_cm2', L.sigma0cm2, G.sigma0cm2], ['fit_r2', L.r2 ?? '', G.r2 ?? ''], ['area_in_window_pct', L.area ?? '', G.area ?? ''], ['int_alpha_domega', L.intW, G.intW], ['n_r', p.nr, p.nr], ['concentration_mM', p.conc, p.conc], ['path_length_m', p.L, p.L]];
+  return rows.map(x => x.join(',')).join('\n') + '\n';
+}
+
+$('run').onclick = () => {
+  try {
+    const p = readCommon(), r = S.mode === 'S' ? runSpectrum(p) : runManual(p);
+    S.res = { r, p };
+    $('results').innerHTML = resultsHTML(r, p);
+    if (r.manual) { $('plot').innerHTML = '<div class="empty">No spectrum plot in "From peak parameters" mode.</div>'; $('plotLegend').innerHTML = ''; }
+    else { $('plot').innerHTML = plotSVG(r, p); $('plotLegend').innerHTML = '<span class="dot" style="background:#2f6fed"></span>Data in window<span class="dot" style="background:#d63c2f"></span>Lorentzian fit<span class="dot" style="background:#17734a"></span>Gaussian fit<span class="dot" style="background:#7a3fa0"></span>Entered peak wavelength (dashed)'; }
+    $('dlCsv').disabled = false; setStatus('Done');
+  } catch (e) { setStatus(e.message, true); }
+};
+$('dlCsv').onclick = () => { if (!S.res) return; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csvOf(S.res.r, S.res.p)], { type: 'text/csv' })); a.download = 'oscillator_strength.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); };
+<\/script>
+</body>
+</html>
+</script>
+<script>
+const F = [document.getElementById('f1'), document.getElementById('f2')], B = [document.getElementById('b1'), document.getElementById('b2')];
+F[0].srcdoc = document.getElementById('src1').textContent.replace(/<\\\/script/g, '</script');
+F[1].srcdoc = document.getElementById('src2').textContent.replace(/<\\\/script/g, '</script');
+function fit(f) { try { const d = f.contentDocument; if (!d || !d.body) return; const h = Math.max(d.documentElement.scrollHeight, d.body.scrollHeight); if (h > 0 && Math.abs(f.offsetHeight - h) > 2) f.style.height = h + 'px'; } catch (e) {} }
+function show(i) { F.forEach((f, k) => { f.hidden = k !== i; B[k].classList.toggle('on', k === i); }); fit(F[i]); try { F[i].contentWindow.dispatchEvent(new Event('resize')); } catch (e) {} }
+B.forEach((b, i) => b.onclick = () => show(i));
+setInterval(() => F.forEach(f => { if (!f.hidden) fit(f); }), 400);
+F.forEach(f => f.onload = () => fit(f));
+</script>
+</body>
+</html>
